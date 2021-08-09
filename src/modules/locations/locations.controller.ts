@@ -22,14 +22,9 @@ export class LocationsController {
   async getAverageNoise(
     @Query('lat') lat: number,
     @Query('long') long: number,
-    @Res() res: Response,
   ) {
-    this.logger.log('Gotcha new average noise request!!!');
-    this.logger.log(`${lat} / ${long}`);
-    const toRet = await this.locationsService.getAverageNoise(lat, long);
-    this.logger.log(toRet);
-    if (toRet) return toRet;
-    return res.status(HttpStatus.NO_CONTENT).send();
+    this.logger.log('New average noise request!!!');
+    return await this.locationsService.getAverageNoise(lat, long);
   }
 
   @Post()
