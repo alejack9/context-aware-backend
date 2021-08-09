@@ -1,4 +1,4 @@
-import { Point } from 'geojson';
+import { Feature, Point } from 'geojson';
 import { Entity, Column, BaseEntity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
@@ -17,11 +17,11 @@ export class Noise extends BaseEntity {
   @Column('double precision')
   noise: number;
 
-  static build(location: Point, timestamp: number, noise: number) {
+  static build(feature: Feature<Point>) {
     const toRet = new Noise();
-    toRet.location = location;
-    toRet.timestamp = new Date(timestamp);
-    toRet.noise = noise;
+    toRet.location = feature.geometry;
+    toRet.timestamp = new Date(feature.properties.timeStamp);
+    toRet.noise = feature.properties.noiseLevel;
     return toRet;
   }
 }
