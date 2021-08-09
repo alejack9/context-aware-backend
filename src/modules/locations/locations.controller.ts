@@ -2,7 +2,6 @@ import {
   Body,
   Controller,
   Get,
-  HttpStatus,
   Logger,
   Post,
   Query,
@@ -10,7 +9,6 @@ import {
 } from '@nestjs/common';
 import { LocationsService } from './locations.service';
 import { FeatureCollection, Point } from 'geojson';
-import { Response } from 'express';
 
 @Controller('locations')
 export class LocationsController {
@@ -23,13 +21,13 @@ export class LocationsController {
     @Query('lat') lat: number,
     @Query('long') long: number,
   ) {
-    this.logger.log('New average noise request!!!');
+    this.logger.log(`New average noise request from: ${lat},${long}.`);
     return await this.locationsService.getAverageNoise(lat, long);
   }
 
   @Post()
   async addFeatureCollection(@Body() featColl: FeatureCollection<Point>) {
-    this.logger.log('New FeatureCollection received!');
+    this.logger.log(`New FeatureCollection received.`);
     return await this.locationsService.add(featColl);
   }
 }
