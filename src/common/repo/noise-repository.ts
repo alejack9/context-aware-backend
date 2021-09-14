@@ -21,6 +21,11 @@ export class NoiseRepository extends Repository<Noise> {
     ).avg;
   }
 
+  // get all records
+  async getAll(): Promise<Noise[]> {
+    return await this.createQueryBuilder().getMany();
+  }
+
   // save<T extends DeepPartial<Noise>>(
   //   entity: T & { id?: number },
   //   options?: SaveOptions,

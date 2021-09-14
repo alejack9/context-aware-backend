@@ -43,6 +43,11 @@ export class LocationsController {
     return toRet;
   }
 
+  @Get('all')
+  async getAllNoises() {
+    return await this.locationsService.getAllNoises();
+  }
+
   @Post()
   async addFeatureCollection(@Body() featColl: FeatureCollection<Point>) {
     this.logger.log(`New FeatureCollection received.`);
