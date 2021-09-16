@@ -1,3 +1,4 @@
+import { RequestPosition } from './../dtos/request.dto';
 import { Point } from 'geojson';
 import { Entity, Column, BaseEntity, PrimaryGeneratedColumn } from 'typeorm';
 
@@ -12,16 +13,23 @@ export class NoiseRequest extends BaseEntity {
   @Column({
     type: 'geometry',
   })
-  correctLocation: Point;
+  location: Point;
 
-  static build(
-    timeStamp: number,
-    correctLocation: Point,
-    otherLocations: Point[],
-  ) {
+  @Column()
+  dummyLocation: boolean;
+
+  @Column()
+  gpsPerturbated: boolean;
+
+  static build(req: RequestPosition) {
     const toRet = new NoiseRequest();
-    toRet.correctLocation = correctLocation;
-    toRet.timestamp = new Date(timeStamp);
+    toRet.dummyLocation = req.dummyLocation;
+    toRet.gpsPerturbated = req.gpsPerturbated;
+    toRet.location = {
+      type: 'Point',
+      coordinates: req.coords,
+    };
+    toRet.timestamp = new Date(Date.now());
     return toRet;
   }
 }

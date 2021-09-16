@@ -15,14 +15,15 @@ export class LocationsController {
     @Query('requests', new RequestParserPipe()) request: RequestDto,
   ) {
     this.logger.log(`New multiple average noise request.`);
+
     return await Promise.all(
-      request.positions.map(
-        async (position) =>
-          await this.locationsService.getAverageNoise(
-            position.coords[0],
-            position.coords[1],
-          ),
-      ),
+      request.positions.map(async (position) => {
+        await this.locationsService.logRequest(position);
+        return await this.locationsService.getAverageNoise(
+          position.coords[0],
+          position.coords[1],
+        );
+      }),
     );
   }
 

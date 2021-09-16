@@ -1,3 +1,5 @@
+import { NoiseRequest } from './../../common/schemas/noise-request.entity';
+import { RequestPosition } from '../../common/dtos/request.dto';
 import { Injectable } from '@nestjs/common';
 import { FeatureCollection, Point } from 'geojson';
 import { NoiseRepository } from 'src/common/repo/noise-repository';
@@ -6,7 +8,7 @@ import { getCustomRepository, getRepository } from 'typeorm';
 
 @Injectable()
 export class LocationsService {
-  async getAverageNoise(lat: number, long: number) {
+  async getAverageNoise(long: number, lat: number) {
     return await getCustomRepository(NoiseRepository).getAverage({
       lat,
       long,
@@ -14,8 +16,12 @@ export class LocationsService {
   }
 
   async add(featuresCollection: FeatureCollection<Point>) {
-    return await getRepository(Noise).save(
+    await getRepository(Noise).save(
       featuresCollection.features.map(Noise.build),
     );
+  }
+
+  async logRequest(request: RequestPosition) {
+    await getRepository(NoiseRequest).save(NoiseRequest.build(request));
   }
 }

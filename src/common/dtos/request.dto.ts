@@ -1,8 +1,9 @@
 export interface RequestDto {
-  positions: Position[];
+  positions: RequestPosition[];
 }
 
-interface Position {
-  correct: boolean;
+export interface RequestPosition {
+  dummyLocation: boolean;
+  gpsPerturbated: boolean;
   coords: number[];
 }
