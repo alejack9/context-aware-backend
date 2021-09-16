@@ -15,8 +15,26 @@ export class LocationsService {
     });
   }
 
-  async getAllNoises() {
-    return await getCustomRepository(NoiseRepository).getAll();
+  async getAllNoisesInArea(
+    //           lon      lat
+    southWest: [number, number], // min
+    northEast: [number, number], // max
+  ) {
+    return await getCustomRepository(NoiseRepository).getAllNoisesInArea(
+      southWest, //min
+      northEast, //max
+    );
+  }
+
+  async getKmeansInArea(
+    //           lon      lat
+    southWest: [number, number], // min
+    northEast: [number, number], // max
+  ) {
+    return await getCustomRepository(NoiseRepository).getKMeansInArea(
+      southWest, //min
+      northEast, //max
+    );
   }
 
   async add(featuresCollection: FeatureCollection<Point>) {
