@@ -15,6 +15,10 @@ export class LocationsService {
     });
   }
 
+  async getAllNoises() {
+    return await getCustomRepository(NoiseRepository).getAll();
+  }
+
   async add(featuresCollection: FeatureCollection<Point>) {
     await getRepository(Noise).save(
       featuresCollection.features.map(Noise.build),

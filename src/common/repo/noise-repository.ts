@@ -20,4 +20,20 @@ export class NoiseRepository extends Repository<Noise> {
         .getRawOne()
     ).avg;
   }
+
+  // get all records
+  async getAll(): Promise<Noise[]> {
+    return await this.createQueryBuilder().getMany();
+  }
+
+  // save<T extends DeepPartial<Noise>>(
+  //   entity: T & { id?: number },
+  //   options?: SaveOptions,
+  // ): Promise<T> {
+  //   console.log(`saving ${entity}`);
+  //   // @ts-ignore
+  //   if (!entity.id) return this.create(entity);
+  //   // @ts-ignore
+  //   else return this.update(entity._id, entity);
+  // }
 }
