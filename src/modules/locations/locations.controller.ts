@@ -6,7 +6,6 @@ import {
   Logger,
   Post,
   Query,
-  Res,
 } from '@nestjs/common';
 import { LocationsService } from './locations.service';
 import { FeatureCollection, Point } from 'geojson';
