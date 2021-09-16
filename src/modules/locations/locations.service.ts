@@ -28,11 +28,24 @@ export class LocationsService {
     //           lon      lat
     southWest: [number, number], // min
     northEast: [number, number], // max
-  ) {
-    return await getCustomRepository(NoiseRepository).getKMeansInArea(
+  ): Promise<FeatureCollection<Point>> {
+    const res = await getCustomRepository(NoiseRepository).getKMeansInArea(
       southWest, //min
       northEast, //max
     );
+
+    return {
+      type: 'FeatureCollection',
+      features: res.map((el) => {
+        return {
+          geometry: JSON.parse(el.locationString),
+          properties: {
+            cid: el.cid,
+          },
+          type: 'Feature',
+        };
+      }),
+    };
   }
 
   async add(featuresCollection: FeatureCollection<Point>) {

@@ -60,10 +60,10 @@ export class LocationsController {
 
   @Get('kmeansInArea')
   async getKmeansInArea(
-    // down left cornel (min)
+    // down left corner (min)
     @Query('swLong') swLongString: string,
     @Query('swLat') swLatString: string,
-    // up right cornel (max)
+    // up right corner (max)
     @Query('neLong') neLongString: string,
     @Query('neLat') neLatsString: string,
   ) {
