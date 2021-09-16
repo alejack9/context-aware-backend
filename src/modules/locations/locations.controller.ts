@@ -43,9 +43,34 @@ export class LocationsController {
     return toRet;
   }
 
-  @Get('all')
-  async getAllNoises() {
-    return await this.locationsService.getAllNoises();
+  @Get('samplesInArea')
+  async getSamplesInArea(
+    // down left cornel (min)
+    @Query('swLong') swLongString: string,
+    @Query('swLat') swLatString: string,
+    // up right cornel (max)
+    @Query('neLong') neLongString: string,
+    @Query('neLat') neLatsString: string,
+  ) {
+    return await this.locationsService.getAllNoisesInArea(
+      [parseFloat(swLongString), parseFloat(swLatString)], // min
+      [parseFloat(neLongString), parseFloat(neLatsString)], // max
+    );
+  }
+
+  @Get('kmeansInArea')
+  async getKmeansInArea(
+    // down left cornel (min)
+    @Query('swLong') swLongString: string,
+    @Query('swLat') swLatString: string,
+    // up right cornel (max)
+    @Query('neLong') neLongString: string,
+    @Query('neLat') neLatsString: string,
+  ) {
+    return await this.locationsService.getKmeansInArea(
+      [parseFloat(swLongString), parseFloat(swLatString)], // min
+      [parseFloat(neLongString), parseFloat(neLatsString)], // max
+    );
   }
 
   @Post()
