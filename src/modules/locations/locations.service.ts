@@ -15,12 +15,46 @@ export class LocationsService {
     });
   }
 
+  // async getAllNoisesInArea(
+  //   //           lon      lat
+  //   southWest: [number, number], // min
+  //   northEast: [number, number], // max
+  // ) {
+  //   return await getCustomRepository(NoiseRepository).getAllNoisesInArea(
+  //     southWest, //min
+  //     northEast, //max
+  //   );
+  // }
+
   async getAllNoisesInArea(
     //           lon      lat
     southWest: [number, number], // min
     northEast: [number, number], // max
+  ): Promise<FeatureCollection<Point>> {
+    const res = await getCustomRepository(NoiseRepository).getAllNoisesInArea(
+      southWest, //min
+      northEast, //max
+    );
+
+    return {
+      type: 'FeatureCollection',
+      features: res.map((el) => {
+        return {
+          geometry: el.location,
+          properties: {
+            noise: el.noise,
+          },
+          type: 'Feature',
+        };
+      }),
+    };
+  }
+
+  async countSamplesInArea(
+    southWest: [number, number], // min
+    northEast: [number, number], // max
   ) {
-    return await getCustomRepository(NoiseRepository).getAllNoisesInArea(
+    return await getCustomRepository(NoiseRepository).countSamplesInArea(
       southWest, //min
       northEast, //max
     );
