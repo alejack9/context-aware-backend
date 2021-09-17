@@ -1,6 +1,14 @@
 import { RequestParserPipe } from './../../common/pipes/request-parser.pipe';
 import { RequestDto } from './../../common/dtos/request.dto';
-import { Body, Controller, Get, Logger, Post, Query } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Get,
+  Logger,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { LocationsService } from './locations.service';
 import { FeatureCollection, Point } from 'geojson';
 
@@ -30,60 +38,39 @@ export class LocationsController {
   @Get('samplesInArea')
   async getSamplesInArea(
     // down left cornel (min)
-    @Query('swLong') swLongString: string,
-    @Query('swLat') swLatString: string,
+    @Query('swLong') swLong: number,
+    @Query('swLat') swLat: number,
     // up right cornel (max)
-    @Query('neLong') neLongString: string,
-    @Query('neLat') neLatsString: string,
+    @Query('neLong') neLong: number,
+    @Query('neLat') neLats: number,
   ) {
     return await this.locationsService.getAllNoisesInArea(
-      [parseFloat(swLongString), parseFloat(swLatString)], // min
-      [parseFloat(neLongString), parseFloat(neLatsString)], // max
+      [swLong, swLat], // min
+      [neLong, neLats], // max
     );
   }
 
   @Get('kmeansInArea')
   async getKmeansInArea(
+    @Query('k') k: number,
     // down left corner (min)
-    @Query('swLong') swLongString: string,
-    @Query('swLat') swLatString: string,
+    @Query('swLong') swLongString: number,
+    @Query('swLat') swLatString: number,
     // up right corner (max)
-    @Query('neLong') neLongString: string,
-    @Query('neLat') neLatsString: string,
+    @Query('neLong') neLongString: number,
+    @Query('neLat') neLatsString: number,
   ) {
-    return await this.locationsService.getKmeansInArea(
-      [parseFloat(swLongString), parseFloat(swLatString)], // min
-      [parseFloat(neLongString), parseFloat(neLatsString)], // max
-    );
-  }
+    if (
+      (await this.locationsService.countSamplesInArea(
+        [swLongString, swLatString],
+        [neLongString, neLatsString],
+      )) < k
+    )
+      throw new BadRequestException('Not enough samples in selected area');
 
-  @Get('samplesInArea')
-  async getSamplesInArea(
-    // down left cornel (min)
-    @Query('swLong') swLongString: string,
-    @Query('swLat') swLatString: string,
-    // up right cornel (max)
-    @Query('neLong') neLongString: string,
-    @Query('neLat') neLatsString: string,
-  ) {
-    return await this.locationsService.getAllNoisesInArea(
-      [parseFloat(swLongString), parseFloat(swLatString)], // min
-      [parseFloat(neLongString), parseFloat(neLatsString)], // max
-    );
-  }
-
-  @Get('kmeansInArea')
-  async getKmeansInArea(
-    // down left corner (min)
-    @Query('swLong') swLongString: string,
-    @Query('swLat') swLatString: string,
-    // up right corner (max)
-    @Query('neLong') neLongString: string,
-    @Query('neLat') neLatsString: string,
-  ) {
     return await this.locationsService.getKmeansInArea(
-      [parseFloat(swLongString), parseFloat(swLatString)], // min
-      [parseFloat(neLongString), parseFloat(neLatsString)], // max
+      [swLongString, swLatString], // min
+      [neLongString, neLatsString], // max
     );
   }
 

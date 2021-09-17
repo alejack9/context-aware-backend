@@ -26,19 +26,30 @@ export class NoiseRepository extends Repository<Noise> {
     sw: [number, number], // min
     ne: [number, number], // max
   ): Promise<Noise[]> {
-    return await this.createQueryBuilder('noise')
-      .where(
-        // 'location && ST_MakeEnvelope(12.961822467019473, 43.34242776649977,13.039337557957989, 43.311021473942844, 4326)',
-        'location && ST_MakeEnvelope(:minLon, :minLat, :maxLon, :maxLat, 4326)',
-        {
-          minLon: sw[0],
-          minLat: sw[1],
-          maxLon: ne[0],
-          maxLat: ne[1],
-        },
-      )
-      .getMany();
+    return await this.selectSamplesInAreaBuilder(sw, ne).getMany();
   }
+
+  async countSamplesInArea(
+    sw: [number, number], // min
+    ne: [number, number], // max
+  ) {
+    return await this.selectSamplesInAreaBuilder(sw, ne).getCount();
+  }
+
+  private selectSamplesInAreaBuilder = (
+    sw: [number, number], // min
+    ne: [number, number], // max
+  ) =>
+    this.createQueryBuilder('noise').where(
+      // 'location && ST_MakeEnvelope(12.961822467019473, 43.34242776649977,13.039337557957989, 43.311021473942844, 4326)',
+      'location && ST_MakeEnvelope(:minLon, :minLat, :maxLon, :maxLat, 4326)',
+      {
+        minLon: sw[0],
+        minLat: sw[1],
+        maxLon: ne[0],
+        maxLat: ne[1],
+      },
+    );
 
   async getKMeansInArea(
     //    lon      lat
