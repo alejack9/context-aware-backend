@@ -64,10 +64,12 @@ export class LocationsService {
     //           lon      lat
     southWest: [number, number], // min
     northEast: [number, number], // max
+    k: number,
   ): Promise<FeatureCollection<Point>> {
     const res = await getCustomRepository(NoiseRepository).getKMeansInArea(
       southWest, //min
       northEast, //max
+      k,
     );
 
     return {

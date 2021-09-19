@@ -71,6 +71,7 @@ export class LocationsController {
     return await this.locationsService.getKmeansInArea(
       [swLongString, swLatString], // min
       [neLongString, neLatsString], // max
+      k,
     );
   }
 

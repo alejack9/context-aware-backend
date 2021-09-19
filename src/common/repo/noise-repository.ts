@@ -55,10 +55,11 @@ export class NoiseRepository extends Repository<Noise> {
     //    lon      lat
     sw: [number, number], // min
     ne: [number, number], // max
+    k: number,
   ): Promise<{ cid: number; locationString: string }[]> {
     return await this.createQueryBuilder('noise')
       .select(
-        'ST_ClusterKMeans(location, 4) OVER() AS cid, ST_AsGeoJSON(location) AS "locationString"',
+        `ST_ClusterKMeans(location, ${k}) OVER() AS cid, ST_AsGeoJSON(location) AS "locationString"`,
       )
       .where(
         // 'location && ST_MakeEnvelope(12.961822467019473, 43.34242776649977,13.039337557957989, 43.311021473942844, 4326)',
