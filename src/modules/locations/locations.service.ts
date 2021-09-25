@@ -42,6 +42,7 @@ export class LocationsService {
         return {
           geometry: el.location,
           properties: {
+            timestamp: el.timestamp,
             noise: el.noise,
           },
           type: 'Feature',
