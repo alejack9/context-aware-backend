@@ -39,7 +39,7 @@ export class TrustedController {
     @Query('dummyUpdatesRadiusMax', new DefaultValuePipe(0.004), ParseFloatPipe)
     dummyUpdatesRadiusMax?: number,
   ) {
-    const coords = [lat, long];
+    const coords = [long, lat];
 
     const correctReq: PositionRequest = {
       coords,
