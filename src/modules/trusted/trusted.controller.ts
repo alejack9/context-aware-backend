@@ -38,60 +38,66 @@ export class TrustedController {
     dummyUpdatesRadiusMin?: number,
     @Query('dummyUpdatesRadiusMax', new DefaultValuePipe(0.004), ParseFloatPipe)
     dummyUpdatesRadiusMax?: number,
-  ) {
-    const coords = [long, lat];
-
+  ): Promise<number> {
     const correctReq: PositionRequest = {
-      coords,
+      coords: [long, lat],
       gpsPerturbated: false,
       dummyLocation: false,
     };
 
+    if (!perturbatorEnabled && !dummyUpdatesEnabled)
+      return (
+        await this.trustedService.requestAverageNoises({
+          positions: [correctReq],
+          settings: {
+            dummyUpdatesCount,
+            dummyUpdatesRadiusMax,
+            dummyUpdatesRadiusMin,
+            perturbatorDecimals,
+          },
+        })
+      )[0];
+
     const locations: PositionRequest[] = [];
-    let correct = 0;
+    const correct = randomInt(0, dummyUpdatesCount - 1);
 
-    if (perturbatorEnabled || dummyUpdatesEnabled) {
-      correct = randomInt(0, dummyUpdatesCount - 1);
-
-      for (let i = 0; i < dummyUpdatesCount; i++) {
-        if (correct !== i) {
-          if (dummyUpdatesEnabled)
+    for (let i = 0; i < dummyUpdatesCount; i++)
+      if (correct === i) locations.push(correctReq);
+      else {
+        if (dummyUpdatesEnabled) {
+          locations.push(
+            this.trustedService.dummyPositionMaker(
+              correctReq,
+              dummyUpdatesRadiusMin,
+              dummyUpdatesRadiusMax,
+            ),
+          );
+          if (perturbatorEnabled)
             locations.push(
-              this.trustedService.dummyPositionMaker(
-                correctReq,
-                dummyUpdatesRadiusMin,
-                dummyUpdatesRadiusMax,
+              this.trustedService.perturbate(
+                locations[locations.length - 1],
+                perturbatorDecimals,
               ),
             );
-          if (perturbatorEnabled) {
-            if (dummyUpdatesEnabled)
-              locations.push(
-                this.trustedService.perturbate(
-                  locations[locations.length - 1],
-                  perturbatorDecimals,
-                ),
-              );
-
-            locations.push(
-              this.trustedService.perturbate(correctReq, perturbatorDecimals),
-            );
-          }
-        } else locations.push(correctReq);
+        }
+        if (perturbatorEnabled)
+          locations.push(
+            this.trustedService.perturbate(correctReq, perturbatorDecimals),
+          );
       }
-    } else locations.push(correctReq);
 
-    const req: RequestDto = {
-      positions: locations,
-      settings: {
-        dummyUpdatesCount,
-        dummyUpdatesRadiusMax,
-        dummyUpdatesRadiusMin,
-        perturbatorDecimals,
-      },
-    };
+    return (
+      await this.trustedService.requestAverageNoises({
+        positions: locations,
+        settings: {
+          dummyUpdatesCount,
+          dummyUpdatesRadiusMax,
+          dummyUpdatesRadiusMin,
+          perturbatorDecimals,
+        },
+      })
+    )[correct];
 
-    return (await this.trustedService.requestAverageNoises(req))[correct];
-
-    // mix-up and request to getAverageNoises of the location module through http service
+    // TODO cloaking
   }
 }
