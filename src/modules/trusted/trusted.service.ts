@@ -61,7 +61,11 @@ export class TrustedService {
   async requestAverageNoises(dto: RequestDto): Promise<any> {
     return (
       await this.http
-        .get(`http://localhost:3000/locations?requests=${JSON.stringify(dto)}`)
+        .get(
+          `https://context-aware-backend.herokuapp.com/locations?requests=${JSON.stringify(
+            dto,
+          )}`,
+        )
         .toPromise()
     ).data;
   }
