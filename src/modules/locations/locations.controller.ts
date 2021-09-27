@@ -21,7 +21,7 @@ export class LocationsController {
   @Get()
   async getAverageNoises(
     @Query('requests', new JsonParserPipe()) request: RequestDto,
-  ) {
+  ): Promise<number[]> {
     this.logger.log(`New multiple average noise request.`);
 
     return await Promise.all(

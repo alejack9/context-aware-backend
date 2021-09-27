@@ -58,7 +58,7 @@ export class TrustedService {
     };
   }
 
-  async requestAverageNoises(dto: RequestDto): Promise<any> {
+  async requestAverageNoises(dto: RequestDto): Promise<number[]> {
     return (
       await this.http
         .get(

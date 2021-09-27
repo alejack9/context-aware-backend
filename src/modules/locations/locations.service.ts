@@ -11,7 +11,7 @@ import { getCustomRepository, getRepository } from 'typeorm';
 
 @Injectable()
 export class LocationsService {
-  async getAverageNoise(long: number, lat: number) {
+  async getAverageNoise(long: number, lat: number): Promise<number> {
     return await getCustomRepository(NoiseRepository).getAverage({
       lat,
       long,
