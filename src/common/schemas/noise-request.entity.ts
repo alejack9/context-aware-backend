@@ -1,4 +1,4 @@
-import { RequestPosition } from './../dtos/request.dto';
+import { PositionRequest, PrivacyPreferences } from './../dtos/request.dto';
 import { Point } from 'geojson';
 import { Entity, Column, BaseEntity, PrimaryGeneratedColumn } from 'typeorm';
 
@@ -21,7 +21,19 @@ export class NoiseRequest extends BaseEntity {
   @Column()
   gpsPerturbated: boolean;
 
-  static build(req: RequestPosition) {
+  @Column()
+  perturbatorDecimals: number;
+
+  @Column()
+  dummyUpdatesCount: number;
+
+  @Column('double precision')
+  dummyUpdatesRadiusMin: number;
+
+  @Column('double precision')
+  dummyUpdatesRadiusMax: number;
+
+  static build(req: PositionRequest, privacyPreferences: PrivacyPreferences) {
     const toRet = new NoiseRequest();
     toRet.dummyLocation = req.dummyLocation;
     toRet.gpsPerturbated = req.gpsPerturbated;
@@ -30,6 +42,11 @@ export class NoiseRequest extends BaseEntity {
       coordinates: req.coords,
     };
     toRet.timestamp = new Date(Date.now());
+    toRet.dummyUpdatesRadiusMin = privacyPreferences.dummyUpdatesRadiusMin;
+    toRet.dummyUpdatesRadiusMax = privacyPreferences.dummyUpdatesRadiusMax;
+    toRet.dummyUpdatesCount = privacyPreferences.dummyUpdatesCount;
+    toRet.perturbatorDecimals = privacyPreferences.perturbatorDecimals;
+
     return toRet;
   }
 }

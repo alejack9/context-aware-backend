@@ -1,5 +1,8 @@
 import { NoiseRequest } from './../../common/schemas/noise-request.entity';
-import { RequestPosition } from '../../common/dtos/request.dto';
+import {
+  PositionRequest,
+  PrivacyPreferences,
+} from '../../common/dtos/request.dto';
 import { Injectable } from '@nestjs/common';
 import { FeatureCollection, Point } from 'geojson';
 import { NoiseRepository } from 'src/common/repo/noise-repository';
@@ -14,17 +17,6 @@ export class LocationsService {
       long,
     });
   }
-
-  // async getAllNoisesInArea(
-  //   //           lon      lat
-  //   southWest: [number, number], // min
-  //   northEast: [number, number], // max
-  // ) {
-  //   return await getCustomRepository(NoiseRepository).getAllNoisesInArea(
-  //     southWest, //min
-  //     northEast, //max
-  //   );
-  // }
 
   async getAllNoisesInArea(
     //           lon      lat
@@ -92,7 +84,12 @@ export class LocationsService {
     );
   }
 
-  async logRequest(request: RequestPosition) {
-    await getRepository(NoiseRequest).save(NoiseRequest.build(request));
+  async logRequest(
+    request: PositionRequest,
+    privacyPreferences: PrivacyPreferences,
+  ) {
+    await getRepository(NoiseRequest).save(
+      NoiseRequest.build(request, privacyPreferences),
+    );
   }
 }

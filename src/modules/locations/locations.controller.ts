@@ -1,4 +1,4 @@
-import { RequestParserPipe } from './../../common/pipes/request-parser.pipe';
+import { JsonParserPipe } from '../../common/pipes/json-parser.pipe';
 import { RequestDto } from './../../common/dtos/request.dto';
 import {
   BadRequestException,
@@ -20,13 +20,13 @@ export class LocationsController {
 
   @Get()
   async getAverageNoises(
-    @Query('requests', new RequestParserPipe()) request: RequestDto,
+    @Query('requests', new JsonParserPipe()) request: RequestDto,
   ) {
     this.logger.log(`New multiple average noise request.`);
 
     return await Promise.all(
       request.positions.map(async (position) => {
-        await this.locationsService.logRequest(position);
+        await this.locationsService.logRequest(position, request.settings);
         return await this.locationsService.getAverageNoise(
           position.coords[0],
           position.coords[1],

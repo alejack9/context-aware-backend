@@ -1,9 +1,17 @@
 export interface RequestDto {
-  positions: RequestPosition[];
+  positions: PositionRequest[];
+  settings: PrivacyPreferences;
 }
 
-export interface RequestPosition {
+export interface PositionRequest {
   dummyLocation: boolean;
   gpsPerturbated: boolean;
   coords: number[];
+}
+
+export interface PrivacyPreferences {
+  perturbatorDecimals: number;
+  dummyUpdatesCount: number;
+  dummyUpdatesRadiusMin: number;
+  dummyUpdatesRadiusMax: number;
 }

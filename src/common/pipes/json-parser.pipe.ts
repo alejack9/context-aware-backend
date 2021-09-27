@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 
 @Injectable()
-export class RequestParserPipe implements PipeTransform {
+export class JsonParserPipe implements PipeTransform {
   transform(value: any, metadata: ArgumentMetadata) {
     try {
       return JSON.parse(value);
