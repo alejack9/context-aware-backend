@@ -24,7 +24,7 @@ export class TrustedController {
     @Query('long', ParseFloatPipe) long: number,
     @Query('perturbatorEnabled', new DefaultValuePipe(false), ParseBoolPipe)
     perturbatorEnabled?: boolean,
-    @Query('perturbatorDecimals', new DefaultValuePipe(0), ParseIntPipe)
+    @Query('perturbatorDecimals', new DefaultValuePipe(3), ParseIntPipe)
     perturbatorDecimals?: number,
     @Query('dummyUpdatesEnabled', new DefaultValuePipe(false), ParseBoolPipe)
     dummyUpdatesEnabled?: boolean,
@@ -48,9 +48,10 @@ export class TrustedController {
     };
 
     const locations: PositionRequest[] = [];
+    let correct = 0;
 
     if (perturbatorEnabled || dummyUpdatesEnabled) {
-      const correct = randomInt(0, dummyUpdatesCount - 1);
+      correct = randomInt(0, dummyUpdatesCount - 1);
 
       for (let i = 0; i < dummyUpdatesCount; i++) {
         if (correct !== i) {
@@ -89,7 +90,7 @@ export class TrustedController {
       },
     };
 
-    return await this.trustedService.requestAverageNoises(req);
+    return (await this.trustedService.requestAverageNoises(req))[correct];
 
     // mix-up and request to getAverageNoises of the location module through http service
   }
