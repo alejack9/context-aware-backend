@@ -1,3 +1,4 @@
+import { DomainGeoJsonProperties } from './../../common/dtos/geojson.properties';
 import { NoiseRequest } from './../../common/schemas/noise-request.entity';
 import {
   PositionRequest,
@@ -79,7 +80,9 @@ export class LocationsService {
     };
   }
 
-  async add(featuresCollection: FeatureCollection<Point>) {
+  async add(
+    featuresCollection: FeatureCollection<Point, DomainGeoJsonProperties>,
+  ) {
     await getRepository(Noise).save(
       featuresCollection.features.map(Noise.build),
     );

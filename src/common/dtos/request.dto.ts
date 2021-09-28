@@ -3,6 +3,24 @@ export interface RequestDto {
   settings: PrivacyPreferences;
 }
 
+export function buildDto(
+  positions: PositionRequest[],
+  dummyUpdatesCount: number,
+  dummyUpdatesRadiusMax: number,
+  dummyUpdatesRadiusMin: number,
+  perturbatorDecimals: number,
+): RequestDto {
+  return {
+    positions,
+    settings: {
+      dummyUpdatesCount,
+      dummyUpdatesRadiusMax,
+      dummyUpdatesRadiusMin,
+      perturbatorDecimals,
+    },
+  };
+}
+
 export interface PositionRequest {
   dummyLocation: boolean;
   gpsPerturbated: boolean;

@@ -1,3 +1,4 @@
+import { DomainGeoJsonProperties } from './../../common/dtos/geojson.properties';
 import { JsonParserPipe } from '../../common/pipes/json-parser.pipe';
 import { RequestDto } from './../../common/dtos/request.dto';
 import {
@@ -33,6 +34,15 @@ export class LocationsController {
         );
       }),
     );
+  }
+
+  @Post()
+  async addFeatureCollection(
+    @Body()
+    featColl: FeatureCollection<Point, DomainGeoJsonProperties>,
+  ) {
+    this.logger.log(`New FeatureCollection received.`);
+    return await this.locationsService.add(featColl);
   }
 
   @Get('samplesInArea')
@@ -73,11 +83,5 @@ export class LocationsController {
       [neLongString, neLatsString], // max
       k,
     );
-  }
-
-  @Post()
-  async addFeatureCollection(@Body() featColl: FeatureCollection<Point>) {
-    this.logger.log(`New FeatureCollection received.`);
-    return await this.locationsService.add(featColl);
   }
 }
