@@ -59,7 +59,7 @@ export class TrustedService {
     return (
       await this.http
         .get(
-          `https://context-aware-backend.herokuapp.com/locations?requests=${JSON.stringify(
+          `${process.env.UNTRUSTED_BACKEND}/locations?requests=${JSON.stringify(
             buildDto(
               positions,
               dummyUpdatesCount,
@@ -78,7 +78,7 @@ export class TrustedService {
   ) {
     return (
       await this.http
-        .post('http://10.8.0.2:3000/locations', featureCollection)
+        .post(`${process.env.UNTRUSTED_BACKEND}/locations`, featureCollection)
         .toPromise()
     ).data;
   }
