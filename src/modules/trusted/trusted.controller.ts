@@ -1,5 +1,6 @@
 import { randomInt } from './../../common/utils/math';
 import { TrustedService } from './trusted.service';
+import * as defaultPrivacyParameters from './../../common/default-privacy-parameters';
 import {
   Body,
   Controller,
@@ -73,21 +74,41 @@ export class TrustedController {
   async getAverageNoise(
     @Query('lat', ParseFloatPipe) lat: number,
     @Query('long', ParseFloatPipe) long: number,
-    @Query('perturbatorEnabled', new DefaultValuePipe(false), ParseBoolPipe)
+    @Query(
+      'perturbatorEnabled',
+      new DefaultValuePipe(defaultPrivacyParameters.perturbatorEnabled),
+      ParseBoolPipe,
+    )
     perturbatorEnabled?: boolean,
-    @Query('perturbatorDecimals', new DefaultValuePipe(3), ParseIntPipe)
+    @Query(
+      'perturbatorDecimals',
+      new DefaultValuePipe(defaultPrivacyParameters.perturbatorDecimals),
+      ParseIntPipe,
+    )
     perturbatorDecimals?: number,
-    @Query('dummyUpdatesEnabled', new DefaultValuePipe(false), ParseBoolPipe)
+    @Query(
+      'dummyUpdatesEnabled',
+      new DefaultValuePipe(defaultPrivacyParameters.dummyUpdatesEnabled),
+      ParseBoolPipe,
+    )
     dummyUpdatesEnabled?: boolean,
-    @Query('dummyUpdatesCount', new DefaultValuePipe(10), ParseIntPipe)
+    @Query(
+      'dummyUpdatesCount',
+      new DefaultValuePipe(defaultPrivacyParameters.dummyUpdatesCount),
+      ParseIntPipe,
+    )
     dummyUpdatesCount?: number,
     @Query(
       'dummyUpdatesRadiusMin',
-      new DefaultValuePipe(0.0005),
+      new DefaultValuePipe(defaultPrivacyParameters.dummyUpdatesRadiusMin),
       ParseFloatPipe,
     )
     dummyUpdatesRadiusMin?: number,
-    @Query('dummyUpdatesRadiusMax', new DefaultValuePipe(0.004), ParseFloatPipe)
+    @Query(
+      'dummyUpdatesRadiusMax',
+      new DefaultValuePipe(defaultPrivacyParameters.dummyUpdatesRadiusMax),
+      ParseFloatPipe,
+    )
     dummyUpdatesRadiusMax?: number,
   ): Promise<number> {
     const correctCoords = [long, lat];
@@ -275,7 +296,7 @@ export class TrustedController {
       };
 
       // 3- foreach feature collection send to server
-      this.trustedService.addNoise(featureCollection);
+      await this.trustedService.addNoise(featureCollection);
     }
   }
 }
