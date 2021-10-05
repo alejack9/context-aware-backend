@@ -103,15 +103,4 @@ export class NoiseRepository extends Repository<Noise> {
       )
       .getRawMany<{ cid: number; locationString: string }>();
   }
-
-  // save<T extends DeepPartial<Noise>>(
-  //   entity: T & { id?: number },
-  //   options?: SaveOptions,
-  // ): Promise<T> {
-  //   console.log(`saving ${entity}`);
-  //   // @ts-ignore
-  //   if (!entity.id) return this.create(entity);
-  //   // @ts-ignore
-  //   else return this.update(entity._id, entity);
-  // }
 }
