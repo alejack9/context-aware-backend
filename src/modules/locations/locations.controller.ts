@@ -7,6 +7,7 @@ import {
   Controller,
   Get,
   Logger,
+  ParseBoolPipe,
   Post,
   Query,
 } from '@nestjs/common';
@@ -27,7 +28,7 @@ export class LocationsController {
 
     return await Promise.all(
       request.positions.map(async (position) => {
-        await this.locationsService.logRequest(position, request.settings);
+        // await this.locationsService.logRequest(position, request.settings);
         return await this.locationsService.getAverageNoise(
           position.coords[0],
           position.coords[1],
@@ -53,10 +54,14 @@ export class LocationsController {
     // up right cornel (max)
     @Query('neLong') neLong: number,
     @Query('neLat') neLats: number,
+    @Query('dummyUpdates', ParseBoolPipe) dummyUpdates: boolean,
+    @Query('gpsPerturbated', ParseBoolPipe) gpsPerturbated: boolean,
   ) {
     return await this.locationsService.getAllNoisesInArea(
       [swLong, swLat], // min
       [neLong, neLats], // max
+      dummyUpdates,
+      gpsPerturbated,
     );
   }
 
@@ -69,11 +74,15 @@ export class LocationsController {
     // up right corner (max)
     @Query('neLong') neLongString: number,
     @Query('neLat') neLatsString: number,
+    @Query('dummyUpdates', ParseBoolPipe) dummyUpdates: boolean,
+    @Query('gpsPerturbated', ParseBoolPipe) gpsPerturbated: boolean,
   ) {
     if (
       (await this.locationsService.countSamplesInArea(
         [swLongString, swLatString],
         [neLongString, neLatsString],
+        dummyUpdates,
+        gpsPerturbated,
       )) < k
     )
       throw new BadRequestException('Not enough samples in selected area');
@@ -81,6 +90,8 @@ export class LocationsController {
     return await this.locationsService.getKmeansInArea(
       [swLongString, swLatString], // min
       [neLongString, neLatsString], // max
+      dummyUpdates,
+      gpsPerturbated,
       k,
     );
   }

@@ -23,10 +23,14 @@ export class LocationsService {
     //           lon      lat
     southWest: [number, number], // min
     northEast: [number, number], // max
+    dummyUpdates: boolean,
+    gpsPerturbated: boolean,
   ): Promise<FeatureCollection<Point>> {
     const res = await getCustomRepository(NoiseRepository).getAllNoisesInArea(
       southWest, //min
       northEast, //max
+      dummyUpdates,
+      gpsPerturbated,
     );
 
     return {
@@ -47,22 +51,30 @@ export class LocationsService {
   async countSamplesInArea(
     southWest: [number, number], // min
     northEast: [number, number], // max
+    dummyUpdates: boolean,
+    gpsPerturbated: boolean,
   ) {
     return await getCustomRepository(NoiseRepository).countSamplesInArea(
       southWest, //min
       northEast, //max
+      dummyUpdates,
+      gpsPerturbated,
     );
   }
 
   async getKmeansInArea(
     //           lon      lat
     southWest: [number, number], // min
-    northEast: [number, number], // max
+    northEast: [number, number], // max,
+    dummyUpdates: boolean,
+    gpsPerturbated: boolean,
     k: number,
   ): Promise<FeatureCollection<Point>> {
     const res = await getCustomRepository(NoiseRepository).getKMeansInArea(
       southWest, //min
       northEast, //max
+      dummyUpdates,
+      gpsPerturbated,
       k,
     );
 
