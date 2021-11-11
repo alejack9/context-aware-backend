@@ -189,114 +189,120 @@ export class TrustedController {
     @Body()
     featColl: FeatureCollection<Point, DomainGeoJsonProperties>,
   ) {
-    // foreach feature create a feature collection following privacy settings and it to backend
-    for (const feature of featColl.features) {
-      // 1- create features
-      const fakeCoordsObj = this.getCoords(
-        feature.geometry.coordinates,
-        feature.properties.dummyUpdatesCount,
-        feature.properties.dummyLocation,
-        feature.properties.gpsPerturbated,
-        feature.properties.dummyUpdatesRadiusMin,
-        feature.properties.dummyUpdatesRadiusMax,
-        feature.properties.perturbatorDecimals,
-      );
+    await defaultPrivacyParameters.perturbatorDecimals.forEach((pd) => {
+      defaultPrivacyParameters.dummyUpdatesRadiusMin.forEach((dum) => {
+        defaultPrivacyParameters.dummyUpdatesRadiusMax.forEach((duM) => {
+          // foreach feature create a feature collection following privacy settings and it to backend
+          for (const feature of featColl.features) {
+            // 1- create features
+            const fakeCoordsObj = this.getCoords(
+              feature.geometry.coordinates,
+              feature.properties.dummyUpdatesCount,
+              feature.properties.dummyLocation,
+              feature.properties.gpsPerturbated,
+              dum,
+              duM,
+              pd,
+            );
 
-      const features: Feature<Point, DomainGeoJsonProperties>[] = [
-        ...fakeCoordsObj.dummyUpdatesOnly.map<
-          Feature<Point, DomainGeoJsonProperties>
-        >((coords) => {
-          return {
-            type: 'Feature',
-            geometry: {
-              type: 'Point',
-              coordinates: coords,
-            },
-            properties: {
-              dummyLocation: true,
-              dummyUpdatesCount: feature.properties.dummyUpdatesCount,
-              dummyUpdatesRadiusMax: feature.properties.dummyUpdatesRadiusMax,
-              dummyUpdatesRadiusMin: feature.properties.dummyUpdatesRadiusMin,
-              gpsPerturbated: false,
-              noiseLevel: feature.properties.noiseLevel,
-              perturbatorDecimals: feature.properties.perturbatorDecimals,
-              timeStamp: feature.properties.timeStamp,
-            },
-          };
-        }),
-        ...fakeCoordsObj.gpsPerturbatedOnly.map<
-          Feature<Point, DomainGeoJsonProperties>
-        >((coords) => {
-          return {
-            type: 'Feature',
-            geometry: {
-              type: 'Point',
-              coordinates: coords,
-            },
-            properties: {
-              dummyLocation: false,
-              dummyUpdatesCount: feature.properties.dummyUpdatesCount,
-              dummyUpdatesRadiusMax: feature.properties.dummyUpdatesRadiusMax,
-              dummyUpdatesRadiusMin: feature.properties.dummyUpdatesRadiusMin,
-              gpsPerturbated: true,
-              noiseLevel: feature.properties.noiseLevel,
-              perturbatorDecimals: feature.properties.perturbatorDecimals,
-              timeStamp: feature.properties.timeStamp,
-            },
-          };
-        }),
-        ...fakeCoordsObj.dummyUpdatesAndGpsPerturbated.map<
-          Feature<Point, DomainGeoJsonProperties>
-        >((coords) => {
-          return {
-            type: 'Feature',
-            geometry: {
-              type: 'Point',
-              coordinates: coords,
-            },
-            properties: {
-              dummyLocation: true,
-              dummyUpdatesCount: feature.properties.dummyUpdatesCount,
-              dummyUpdatesRadiusMax: feature.properties.dummyUpdatesRadiusMax,
-              dummyUpdatesRadiusMin: feature.properties.dummyUpdatesRadiusMin,
-              gpsPerturbated: true,
-              noiseLevel: feature.properties.noiseLevel,
-              perturbatorDecimals: feature.properties.perturbatorDecimals,
-              timeStamp: feature.properties.timeStamp,
-            },
-          };
-        }),
-      ];
+            const features: Feature<Point, DomainGeoJsonProperties>[] = [
+              ...fakeCoordsObj.dummyUpdatesOnly.map<
+                Feature<Point, DomainGeoJsonProperties>
+              >((coords) => {
+                return {
+                  type: 'Feature',
+                  geometry: {
+                    type: 'Point',
+                    coordinates: coords,
+                  },
+                  properties: {
+                    dummyLocation: true,
+                    dummyUpdatesCount: feature.properties.dummyUpdatesCount,
+                    dummyUpdatesRadiusMax: dum,
+                    dummyUpdatesRadiusMin: duM,
+                    gpsPerturbated: false,
+                    noiseLevel: feature.properties.noiseLevel,
+                    perturbatorDecimals: pd,
+                    timeStamp: feature.properties.timeStamp,
+                  },
+                };
+              }),
+              ...fakeCoordsObj.gpsPerturbatedOnly.map<
+                Feature<Point, DomainGeoJsonProperties>
+              >((coords) => {
+                return {
+                  type: 'Feature',
+                  geometry: {
+                    type: 'Point',
+                    coordinates: coords,
+                  },
+                  properties: {
+                    dummyLocation: false,
+                    dummyUpdatesCount: feature.properties.dummyUpdatesCount,
+                    dummyUpdatesRadiusMax: dum,
+                    dummyUpdatesRadiusMin: duM,
+                    gpsPerturbated: true,
+                    noiseLevel: feature.properties.noiseLevel,
+                    perturbatorDecimals: pd,
+                    timeStamp: feature.properties.timeStamp,
+                  },
+                };
+              }),
+              ...fakeCoordsObj.dummyUpdatesAndGpsPerturbated.map<
+                Feature<Point, DomainGeoJsonProperties>
+              >((coords) => {
+                return {
+                  type: 'Feature',
+                  geometry: {
+                    type: 'Point',
+                    coordinates: coords,
+                  },
+                  properties: {
+                    dummyLocation: true,
+                    dummyUpdatesCount: feature.properties.dummyUpdatesCount,
+                    dummyUpdatesRadiusMax: dum,
+                    dummyUpdatesRadiusMin: duM,
+                    gpsPerturbated: true,
+                    noiseLevel: feature.properties.noiseLevel,
+                    perturbatorDecimals: pd,
+                    timeStamp: feature.properties.timeStamp,
+                  },
+                };
+              }),
+            ];
 
-      features.splice(randomInt(0, features.length), 0, {
-        type: 'Feature',
-        geometry: {
-          type: 'Point',
-          coordinates: feature.geometry.coordinates,
-        },
-        properties: {
-          dummyLocation: false,
-          dummyUpdatesCount: feature.properties.dummyUpdatesCount,
-          dummyUpdatesRadiusMax: feature.properties.dummyUpdatesRadiusMax,
-          dummyUpdatesRadiusMin: feature.properties.dummyUpdatesRadiusMin,
-          gpsPerturbated: false,
-          noiseLevel: feature.properties.noiseLevel,
-          perturbatorDecimals: feature.properties.perturbatorDecimals,
-          timeStamp: feature.properties.timeStamp,
-        },
+            features.splice(randomInt(0, features.length), 0, {
+              type: 'Feature',
+              geometry: {
+                type: 'Point',
+                coordinates: feature.geometry.coordinates,
+              },
+              properties: {
+                dummyLocation: false,
+                dummyUpdatesCount: feature.properties.dummyUpdatesCount,
+                dummyUpdatesRadiusMax: dum,
+                dummyUpdatesRadiusMin: duM,
+                gpsPerturbated: false,
+                noiseLevel: feature.properties.noiseLevel,
+                perturbatorDecimals: pd,
+                timeStamp: feature.properties.timeStamp,
+              },
+            });
+
+            // 2- put them together in feature collections
+            const featureCollection: FeatureCollection<
+              Point,
+              DomainGeoJsonProperties
+            > = {
+              type: 'FeatureCollection',
+              features: features,
+            };
+
+            // 3- foreach feature collection send to server
+            this.trustedService.addNoise(featureCollection);
+          }
+        });
       });
-
-      // 2- put them together in feature collections
-      const featureCollection: FeatureCollection<
-        Point,
-        DomainGeoJsonProperties
-      > = {
-        type: 'FeatureCollection',
-        features: features,
-      };
-
-      // 3- foreach feature collection send to server
-      await this.trustedService.addNoise(featureCollection);
-    }
+    });
   }
 }
