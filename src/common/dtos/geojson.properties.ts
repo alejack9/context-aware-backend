@@ -7,10 +7,10 @@ export class DomainGeoJsonProperties implements GeoJsonProperties {
 
   dummyLocation: boolean = defaultPrivacyParameters.dummyUpdatesEnabled;
   gpsPerturbated: boolean = defaultPrivacyParameters.perturbatorEnabled;
-  perturbatorDecimals: number = defaultPrivacyParameters.perturbatorDecimals;
+  perturbatorDecimals: number = defaultPrivacyParameters.perturbatorDecimals[0];
   dummyUpdatesCount: number = defaultPrivacyParameters.dummyUpdatesCount;
   dummyUpdatesRadiusMin: number =
-    defaultPrivacyParameters.dummyUpdatesRadiusMin;
+    defaultPrivacyParameters.dummyUpdatesRadiusMin[0];
   dummyUpdatesRadiusMax: number =
-    defaultPrivacyParameters.dummyUpdatesRadiusMax;
+    defaultPrivacyParameters.dummyUpdatesRadiusMax[0];
 }
