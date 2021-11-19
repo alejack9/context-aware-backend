@@ -4,3 +4,7 @@ export const dummyUpdatesEnabled = false;
 export const dummyUpdatesCount = 10;
 export const dummyUpdatesRadiusMin = [0.0007, 0.0006, 0.0005, 0.0004, 0.0003];
 export const dummyUpdatesRadiusMax = [0.002, 0.003, 0.004, 0.005, 0.006];
+export const hyperparamsLength =
+  perturbatorDecimals.length *
+  dummyUpdatesRadiusMin.length *
+  dummyUpdatesRadiusMax.length;
