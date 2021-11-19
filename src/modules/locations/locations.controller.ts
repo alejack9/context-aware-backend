@@ -42,7 +42,7 @@ export class LocationsController {
     @Body()
     featColl: FeatureCollection<Point, DomainGeoJsonProperties>,
   ) {
-    this.logger.log(`New FeatureCollection received.`);
+    // this.logger.log(`New FeatureCollection received.`);
     return await this.locationsService.add(featColl);
   }
 

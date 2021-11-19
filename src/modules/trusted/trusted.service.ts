@@ -1,5 +1,5 @@
 import { DomainGeoJsonProperties } from './../../common/dtos/geojson.properties';
-import { FeatureCollection, Point } from 'geojson';
+import { Feature, FeatureCollection, Point } from 'geojson';
 import {
   countDecimals,
   round,
@@ -9,6 +9,15 @@ import {
 import { PositionRequest, buildDto } from './../../common/dtos/request.dto';
 import { HttpService } from '@nestjs/axios';
 import { Injectable, Logger } from '@nestjs/common';
+
+type featureMakerType = (
+  coords: number[],
+  dummyLocation: boolean,
+  gpsPerturbated: boolean,
+  dummyUpdatesRadiusMin: number,
+  dummyUpdatesRadiusMax: number,
+  perturbatorDecimals: number,
+) => Feature<Point, DomainGeoJsonProperties>;
 
 @Injectable()
 export class TrustedService {
@@ -73,13 +82,84 @@ export class TrustedService {
     ).data;
   }
 
+  private waitFor = async (num: number) =>
+    new Promise((res) => setTimeout(() => res(null), num));
+
   async addNoise(
     featureCollection: FeatureCollection<Point, DomainGeoJsonProperties>,
+  ): Promise<void> {
+    let done = true;
+    do {
+      try {
+        (
+          await this.http
+            .post(
+              `${process.env.UNTRUSTED_BACKEND}/locations`,
+              featureCollection,
+            )
+            .toPromise()
+        ).data;
+        done = true;
+      } catch (e: any) {
+        done = false;
+        this.logger.error(e);
+        this.logger.log('retrying in 500 ms');
+        await this.waitFor(500);
+      }
+    } while (!done);
+  }
+
+  createFeatureFunction(
+    feature: Feature<Point, DomainGeoJsonProperties>,
+  ): featureMakerType {
+    return (
+      coords: number[],
+      dummyLocation: boolean,
+      gpsPerturbated: boolean,
+      dummyUpdatesRadiusMin: number,
+      dummyUpdatesRadiusMax: number,
+      perturbatorDecimals: number,
+    ): Feature<Point, DomainGeoJsonProperties> => {
+      return {
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: coords,
+        },
+        properties: {
+          dummyLocation,
+          dummyUpdatesCount: feature.properties.dummyUpdatesCount,
+          dummyUpdatesRadiusMax,
+          dummyUpdatesRadiusMin,
+          gpsPerturbated,
+          noiseLevel: feature.properties.noiseLevel,
+          perturbatorDecimals,
+          timeStamp: feature.properties.timeStamp,
+        },
+      };
+    };
+  }
+
+  makeFeaturesFunctionMaker(
+    featureMaker: featureMakerType,
+    dummyUpdatesRadiusMin: number,
+    dummyUpdatesRadiusMax: number,
+    perturbatorDecimals: number,
   ) {
     return (
-      await this.http
-        .post(`${process.env.UNTRUSTED_BACKEND}/locations`, featureCollection)
-        .toPromise()
-    ).data;
+      coords: number[][],
+      dummyLocation: boolean,
+      gpsPerturbated: boolean,
+    ) =>
+      coords.map<Feature<Point, DomainGeoJsonProperties>>((coords) =>
+        featureMaker(
+          coords,
+          dummyLocation,
+          gpsPerturbated,
+          dummyUpdatesRadiusMin,
+          dummyUpdatesRadiusMax,
+          perturbatorDecimals,
+        ),
+      );
   }
 }

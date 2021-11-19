@@ -1,6 +1,9 @@
+import { logSend, logProgress } from './../../common/utils/log-utils';
+import waitForPromises from '../../common/utils/promises-waiter';
 import { randomInt } from './../../common/utils/math';
 import { TrustedService } from './trusted.service';
 import * as defaultPrivacyParameters from './../../common/default-privacy-parameters';
+import { product } from 'cartesian-product-generator';
 import {
   Body,
   Controller,
@@ -20,6 +23,8 @@ import { DomainGeoJsonProperties } from 'src/common/dtos/geojson.properties';
 @Controller('trusted')
 export class TrustedController {
   private readonly logger = new Logger('TrustedController');
+  // private readonly trueFeaturesLogger = new Logger('TrueFeaturesInsertion');
+
   constructor(private trustedService: TrustedService) {}
 
   private getCoords(
@@ -184,125 +189,94 @@ export class TrustedController {
     )[correct];
   }
 
+  // private req = 0;
+  // private trueFeaturesAdded = 0;
+
   @Post()
   async addFeatureCollection(
     @Body()
     featColl: FeatureCollection<Point, DomainGeoJsonProperties>,
   ) {
-    await defaultPrivacyParameters.perturbatorDecimals.forEach((pd) => {
-      defaultPrivacyParameters.dummyUpdatesRadiusMin.forEach((dum) => {
-        defaultPrivacyParameters.dummyUpdatesRadiusMax.forEach((duM) => {
-          // foreach feature create a feature collection following privacy settings and it to backend
-          for (const feature of featColl.features) {
-            // 1- create features
-            const fakeCoordsObj = this.getCoords(
-              feature.geometry.coordinates,
-              feature.properties.dummyUpdatesCount,
-              feature.properties.dummyLocation,
-              feature.properties.gpsPerturbated,
-              dum,
-              duM,
-              pd,
-            );
+    // const requestId = this.req++;
+    const currentHyperparamsLength =
+      defaultPrivacyParameters.hyperparamsLength * featColl.features.length;
+    this.logger.log('New trusted position requested.');
+    let i = 0;
+    const proms: Promise<void>[] = [];
 
-            const features: Feature<Point, DomainGeoJsonProperties>[] = [
-              ...fakeCoordsObj.dummyUpdatesOnly.map<
-                Feature<Point, DomainGeoJsonProperties>
-              >((coords) => {
-                return {
-                  type: 'Feature',
-                  geometry: {
-                    type: 'Point',
-                    coordinates: coords,
-                  },
-                  properties: {
-                    dummyLocation: true,
-                    dummyUpdatesCount: feature.properties.dummyUpdatesCount,
-                    dummyUpdatesRadiusMax: dum,
-                    dummyUpdatesRadiusMin: duM,
-                    gpsPerturbated: false,
-                    noiseLevel: feature.properties.noiseLevel,
-                    perturbatorDecimals: pd,
-                    timeStamp: feature.properties.timeStamp,
-                  },
-                };
-              }),
-              ...fakeCoordsObj.gpsPerturbatedOnly.map<
-                Feature<Point, DomainGeoJsonProperties>
-              >((coords) => {
-                return {
-                  type: 'Feature',
-                  geometry: {
-                    type: 'Point',
-                    coordinates: coords,
-                  },
-                  properties: {
-                    dummyLocation: false,
-                    dummyUpdatesCount: feature.properties.dummyUpdatesCount,
-                    dummyUpdatesRadiusMax: dum,
-                    dummyUpdatesRadiusMin: duM,
-                    gpsPerturbated: true,
-                    noiseLevel: feature.properties.noiseLevel,
-                    perturbatorDecimals: pd,
-                    timeStamp: feature.properties.timeStamp,
-                  },
-                };
-              }),
-              ...fakeCoordsObj.dummyUpdatesAndGpsPerturbated.map<
-                Feature<Point, DomainGeoJsonProperties>
-              >((coords) => {
-                return {
-                  type: 'Feature',
-                  geometry: {
-                    type: 'Point',
-                    coordinates: coords,
-                  },
-                  properties: {
-                    dummyLocation: true,
-                    dummyUpdatesCount: feature.properties.dummyUpdatesCount,
-                    dummyUpdatesRadiusMax: dum,
-                    dummyUpdatesRadiusMin: duM,
-                    gpsPerturbated: true,
-                    noiseLevel: feature.properties.noiseLevel,
-                    perturbatorDecimals: pd,
-                    timeStamp: feature.properties.timeStamp,
-                  },
-                };
-              }),
-            ];
-
-            features.splice(randomInt(0, features.length), 0, {
-              type: 'Feature',
-              geometry: {
-                type: 'Point',
-                coordinates: feature.geometry.coordinates,
-              },
-              properties: {
-                dummyLocation: false,
-                dummyUpdatesCount: feature.properties.dummyUpdatesCount,
-                dummyUpdatesRadiusMax: dum,
-                dummyUpdatesRadiusMin: duM,
-                gpsPerturbated: false,
-                noiseLevel: feature.properties.noiseLevel,
-                perturbatorDecimals: pd,
-                timeStamp: feature.properties.timeStamp,
-              },
-            });
-
-            // 2- put them together in feature collections
-            const featureCollection: FeatureCollection<
-              Point,
-              DomainGeoJsonProperties
-            > = {
-              type: 'FeatureCollection',
-              features: features,
-            };
-
-            // 3- foreach feature collection send to server
-            this.trustedService.addNoise(featureCollection);
-          }
-        });
+    for (const feature of featColl.features) {
+      const featureMaker = this.trustedService.createFeatureFunction(feature);
+      await this.trustedService.addNoise({
+        type: 'FeatureCollection',
+        features: [
+          featureMaker(
+            feature.geometry.coordinates,
+            false,
+            false,
+            defaultPrivacyParameters.dummyUpdatesRadiusMin[0],
+            defaultPrivacyParameters.dummyUpdatesRadiusMax[0],
+            defaultPrivacyParameters.perturbatorDecimals[0],
+          ),
+        ],
       });
-    });
+      // this.trueFeaturesLogger.log(
+      //   `${++this.trueFeaturesAdded} true features added`,
+      // );
+
+      const hyperParams = product(
+        defaultPrivacyParameters.perturbatorDecimals,
+        defaultPrivacyParameters.dummyUpdatesRadiusMin,
+        defaultPrivacyParameters.dummyUpdatesRadiusMax,
+      );
+
+      for (const [pertDecimals, dumUpRadMin, dumUpRadMax] of hyperParams) {
+        const fakeCoordsObj = this.getCoords(
+          feature.geometry.coordinates,
+          feature.properties.dummyUpdatesCount,
+          // feature.properties.dummyLocation,
+          // feature.properties.gpsPerturbated,
+          true,
+          true,
+          dumUpRadMin,
+          dumUpRadMax,
+          pertDecimals,
+        );
+
+        const featuresMaker = this.trustedService.makeFeaturesFunctionMaker(
+          featureMaker,
+          dumUpRadMin,
+          dumUpRadMax,
+          pertDecimals,
+        );
+
+        // put features together in features collection
+        const featureCollection: FeatureCollection<
+          Point,
+          DomainGeoJsonProperties
+        > = {
+          type: 'FeatureCollection',
+          features: [
+            ...featuresMaker(fakeCoordsObj.dummyUpdatesOnly, true, false),
+            ...featuresMaker(fakeCoordsObj.gpsPerturbatedOnly, false, true),
+            ...featuresMaker(
+              fakeCoordsObj.dummyUpdatesAndGpsPerturbated,
+              true,
+              true,
+            ),
+          ],
+        };
+
+        // logSend(this.logger, requestId, ++i, currentHyperparamsLength);
+        logSend(this.logger, ++i, currentHyperparamsLength);
+        proms.push(this.trustedService.addNoise(featureCollection));
+      }
+    }
+    await waitForPromises(
+      (cur, tot) => logProgress(this.logger, cur, tot),
+      proms,
+    );
+    this.logger.log(`End sending.`);
+    // await waitForReciving((cur, tot) => logProgress(this.logger,requestId, cur, tot), proms);
+    // this.logger.log(`${requestId} - End sending.`);
   }
 }
