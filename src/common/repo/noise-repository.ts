@@ -11,7 +11,7 @@ export class NoiseRepository extends Repository<Noise> {
       await this.createQueryBuilder('noise')
         .select('avg(noise) as "avg"')
         .where(
-          'ST_DWithin(location, ST_MakePoint(:long , :lat)::geography, 3000)',
+          'ST_DWithin(location, ST_Transform(ST_MakePoint(:long , :lat), 3857), 3000)',
           {
             long: coordinates.long,
             lat: coordinates.lat,
