@@ -1,9 +1,9 @@
 import { Controller, Get } from '@nestjs/common';
 
-@Controller('')
-export class RootController {
+@Controller()
+export class AppController {
   @Get('ping')
-  ping() {
+  ping(): string {
     return 'pong';
   }
 }
