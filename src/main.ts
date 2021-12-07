@@ -1,9 +1,11 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { json } from 'express';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 const environment = process.env.NODE_ENV || 'development';
 if (environment === 'development')
-  require('dotenv').config({ path: __dirname + '/./../alwaysdata.env' });
+  require('dotenv').config({ path: __dirname + '/../.env' });
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -13,6 +15,17 @@ async function bootstrap() {
         : ['error', 'warn'],
   });
   app.enableCors();
+  app.use(json({ limit: '50mb' }));
+
+  SwaggerModule.setup(
+    'api',
+    app,
+    SwaggerModule.createDocument(
+      app,
+      new DocumentBuilder().setTitle('Backend').build(),
+    ),
+  );
+
   await app.listen(process.env.PORT || 3000);
 }
 bootstrap();
