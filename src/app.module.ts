@@ -1,17 +1,19 @@
-import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { LocationsModule } from './modules/locations/locations.module';
-import { TrustedModule } from './modules/trusted/trusted.module';
 import { ConfigModule } from '@nestjs/config';
-import { RootController } from './modules/root/root.controller';
+import { Module } from '@nestjs/common';
+import { AppController } from './routes/root/app.controller';
+import { LocationsModule } from './routes/locations/locations.module';
+import { DbModule } from './db/db.module';
+import ormconfig from './config/orm.config';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({
+      load: [ormconfig],
+    }),
     LocationsModule,
-    TypeOrmModule.forRoot(),
-    TrustedModule,
+    DbModule,
   ],
-  controllers: [RootController],
+  controllers: [AppController],
+  providers: [],
 })
 export class AppModule {}
