@@ -8,6 +8,7 @@ import removedComma from '../../../utils/comma-remover';
 import { IFakeLocation } from '../../schemas/fake-location.interface';
 import { DbConnectionService } from '../../db-connection.service';
 import { BackendPrivacyParameters } from 'src/dtos/backend-privacy-parameters';
+import { CloakingRepository } from '../cloaking-repo';
 
 @Injectable()
 export class RepositoryFactory {
@@ -50,7 +51,7 @@ export class RepositoryFactory {
     return tablePrefix + configs.join('_') + '_noise';
   }
 
-  async getMetersRepository(
+  async getRepository(
     options: BackendPrivacyParameters,
   ): Promise<IRepository<IFakeLocation | RealNoise>> {
     return !options.dummyLocation && !options.gpsPerturbated
@@ -62,5 +63,9 @@ export class RepositoryFactory {
 
   get realRepository() {
     return getCustomRepository(RealLocationRepository);
+  }
+
+  get cloakingRepo() {
+    return getCustomRepository(CloakingRepository);
   }
 }
