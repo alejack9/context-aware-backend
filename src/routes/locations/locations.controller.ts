@@ -1,7 +1,7 @@
 import { LocationsService } from './locations.service';
 
 import { Body, Controller, Get, Logger, Post, Query } from '@nestjs/common';
-import { FeatureCollection, Point } from 'geojson';
+import { FeatureCollection, Point, Polygon } from 'geojson';
 import {
   BackendPrivacyParameters,
   PrivacyOptions,
@@ -31,7 +31,7 @@ export class LocationsController {
   @Post()
   async addFeatureCollection(
     @Body()
-    featColl: FeatureCollection<Point, BackendGeoJsonProperties>,
+    featColl: FeatureCollection<Point | Polygon, BackendGeoJsonProperties>,
   ) {
     this.logger.log(`New FeatureCollection received.`);
     return await this.locationsService.add(featColl);

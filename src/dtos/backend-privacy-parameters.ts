@@ -6,6 +6,8 @@ export class BackendPrivacyParameters {
   dummyLocation: boolean;
   @ApiProperty()
   gpsPerturbated: boolean;
+  @ApiProperty()
+  cloaking: boolean;
   @ApiPropertyOptional()
   perturbatorDecimals?: number;
   @ApiPropertyOptional()
@@ -17,6 +19,7 @@ export class BackendPrivacyParameters {
 export function fromQueryMap(query: any): BackendPrivacyParameters {
   return {
     dummyLocation: /true/i.test(query.dummyLocation),
+    cloaking: /true/i.test(query.cloaking),
     dummyUpdatesRadiusMin: Number(query.dummyUpdatesRadiusMin),
     dummyUpdatesRadiusStep: Number(query.dummyUpdatesRadiusStep),
     gpsPerturbated: /true/i.test(query.gpsPerturbated),
