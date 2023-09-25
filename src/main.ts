@@ -10,6 +10,7 @@ if (environment === 'development')
 async function bootstrap() {
   let x = null;
   let s = x.Test;
+  let t = x.Test;
   const app = await NestFactory.create(AppModule, {
     logger:
       environment === 'development'
