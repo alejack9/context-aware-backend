@@ -8,6 +8,8 @@ if (environment === 'development')
   require('dotenv').config({ path: __dirname + '/../.env' });
 
 async function bootstrap() {
+  let x = null;
+  let s = x.Test;
   const app = await NestFactory.create(AppModule, {
     logger:
       environment === 'development'
